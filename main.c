@@ -22,7 +22,7 @@
 #define deviationCoefficientFlight 			35 						// чутливість в режимі польоту
 #define deviationCoefficientInit 				50						// чутливість в бойовому режимі
 #define daysSelfDestruction 						60 						// час спрацювання  після активації бойового режиму  - ТЗ: 60 днів
-#define TIMEUnchangedMinutes 						1 						// час збору данних в рижімі польоту та перезапуску режиму  - ТЗ: 10хв
+#define TIMEUnchangedMinutes 						10 						// час збору данних в рижімі польоту та перезапуску режиму  - ТЗ: 10хв
 #define SMOOTHING_WINDOW 								7 						// вікно зсуву для вирівнювання даних магнітометра
 #define QMC5883L_SCALE_FACTOR 					0.732421875f 	// коефіцієнт маштабу данних магнітометра
 // НАДАШТУВАННЯ -----------------
