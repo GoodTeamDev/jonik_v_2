@@ -18,10 +18,10 @@
 #define QMC5883_REG_X_LSB 0x00 														// Початковий регістр для осі X
 
 // НАДАШТУВАННЯ +++++++++++++++++
-#define DELAY_AFTER_ACTIVATION 					5000 					// затримка після знаходження цілі і до активації - 1000ms = 1sec
+#define DELAY_AFTER_ACTIVATION 					2000 					// затримка після знаходження цілі і до активації - 1000ms = 1sec
 #define deviationCoefficientFlight 			35 						// чутливість в режимі польоту
 #define deviationCoefficientInit 				50						// чутливість в бойовому режимі
-#define daysSelfDestruction 						60 						// час спрацювання  після активації бойового режиму  - ТЗ: 60 днів
+#define daysSelfDestruction 						1 						// час спрацювання  після активації бойового режиму  - ТЗ: 60 днів
 #define TIMEUnchangedMinutes 						10 						// час збору данних в рижімі польоту та перезапуску режиму  - ТЗ: 10хв
 #define SMOOTHING_WINDOW 								7 						// вікно зсуву для вирівнювання даних магнітометра
 #define QMC5883L_SCALE_FACTOR 					0.732421875f 	// коефіцієнт маштабу данних магнітометра
@@ -212,7 +212,7 @@ void movementFlight() {
   P03 = 0;
 	elapsedSeconds = 0;
 	
-	while (elapsedMinutes <= TIMEUnchangedMinutes) {
+	while (elapsedMinutes <= (TIMEUnchangedMinutes - 1)) {
 		
 		QMC5883_ReadData();
 
@@ -220,7 +220,7 @@ void movementFlight() {
 		
 		magneticFieldDeviation = magneticFieldDeviationFanc();			
 
-		printf("Flight Deviation: %d\r\n", magneticFieldDeviation);
+		//printf("Flight Deviation: %d\r\n", magneticFieldDeviation);
 		
 		if(elapsedSeconds > 1)
 		if ( magneticFieldDeviation > deviationCoefficientFlight) {			
@@ -254,7 +254,7 @@ void combatMode() {
 	
 		magneticFieldDeviation = magneticFieldDeviationFanc();
 		
-		printf("combat Deviation: %d\r\n", magneticFieldDeviation);
+		//printf("combat Deviation: %d\r\n", magneticFieldDeviation);
 		
 		if(i > 10) {
 			if ( magneticFieldDeviation >= deviationCoefficientInit) {
@@ -268,10 +268,12 @@ void combatMode() {
 		
 				
 		if (daysSelfDestruction <= elapsedDays) {
-			P12 = 1;
-			P03 = 1;
-			Timer0_Delay1ms(3000);
-			//break;
+				P03 = 1;
+				Timer0_Delay1ms(DELAY_AFTER_ACTIVATION);
+			
+				P12 = 1;
+			main_operating_mode = 3;	
+			break;			
 		}
 	
 		
@@ -287,8 +289,8 @@ void combatMode() {
 
 void setup(void) {
 	
-	InitialUART0_Timer3(9600);
-	TI = 1;
+	//InitialUART0_Timer3(9600);
+	//TI = 1;
 	
 	Timer0_Init();
   
@@ -331,6 +333,11 @@ void main(void) {
 							
 				case 2: // бойовий рижим
 						combatMode();	
+				break;
+				
+				case 3: // FINISH	
+				P03 = 1;
+				P12 = 1;
 				break;
 						
 			}
